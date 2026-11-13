@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String      @id
+  name             String?
+  email            String      @unique
+  emailVerified    Boolean     @default(false)
+  image            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  twoFactorEnabled Boolean     @default(false)
+  sessions         Session[]
+  accounts         Account[]
+  twoFactors       TwoFactor[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model TwoFactor {
+  id                      String   @id
+  userId                  String
+  secret                  String
+  backupCodes             String?
+  verified                Boolean  @default(false)
+  failedVerificationCount Int      @default(0)
+  lockedUntil             DateTime?
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Testimonial {
+  id         String   @id @default(cuid())
+  name       String
+  course     String
+  review     String
+  rating     Int      @default(5)
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  classLevel  String
+  subject     String
+  imageUrl    String?
+  purchaseUrl String
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  classLevel  String
+  subject     String
+  fileUrl     String
+  createdAt   DateTime @default(now())
+}
+
+model BlogPost {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  excerpt   String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TestSeries {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  classLevel  String
+  subject     String
+  numTests    String
+  purchaseUrl String
+  createdAt   DateTime @default(now())
+}
+
+model Enquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  course    String?
+  message   String
+  status    String   @default("New")
+  createdAt DateTime @default(now())
+}
+
+// --- SINGLE CORRECT VERSION OF SITE SETTINGS ---
+model SiteSettings {
+  id               String   @id @default("global")
+  academyName      String   @default("Toppers Academy of Commerce")
+  contactPhone     String   @default("+91 98765 43210")
+  contactEmail     String   @default("contact@toppersacademy.com")
+  address          String   @default("123 Commerce Street, New Delhi, India")
+  whatsappNumber   String   @default("919876543210")
+  youtubeUrl       String   @default("https://www.youtube.com/@vikrant-ahuja")
+  linkedinUrl      String   @default("")
+  announcementText String   @default("Class 12 Accountancy Datesheet Released! Download the official PDF now.")
+  announcementLink String   @default("/free-resources")
+}
+
+// --- SINGLE CORRECT VERSION OF TEST MODELS ---
+model Test {
+  id          String        @id @default(cuid())
+  title       String
+  subject     String
+  classLevel  String
+  timeLimit   Int           
+  createdAt   DateTime      @default(now())
+  questions   Question[]
+  attempts    TestAttempt[] 
+}
+
+model Question {
+  id            String   @id @default(cuid())
+  testId        String
+  questionText  String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctOption String   
+  test          Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+}
+
+model TestAttempt {
+  id             String   @id @default(cuid())
+  testId         String
+  studentName    String
+  studentPhone   String
+  score          Int
+  totalQuestions Int
+  createdAt      DateTime @default(now())
+  test           Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+}
