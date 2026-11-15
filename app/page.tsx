@@ -1,15 +1,17 @@
 import Footer from "@/components/Footer";
 import TeacherSlideshow from "@/components/TeacherSlideshow";
-import { ArrowRight, BookOpen, Star } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import EnrollButton from "@/components/EnrollButton";
 import CourseImage from "@/components/CourseImage";
+import TestimonialSlideshow from "@/components/TestimonialSlideshow"; // <-- Import new component
 
 export default async function Home() {
+  // Increased take to 5 so we have multiple reviews for the slideshow
   const testimonials = await prisma.testimonial.findMany({
-    take: 2,
+    take: 5,
     orderBy: { createdAt: "desc" },
   });
 
@@ -95,7 +97,6 @@ export default async function Home() {
                   featuredCourses.map((course) => (
                     <div key={course.id} className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative">
 
-                      {/* FIXED IMAGE CONTAINER */}
                       <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden group flex items-center justify-center">
                         <CourseImage src={course.imageUrl || ""} alt={course.title} title={course.title} />
                       </div>
@@ -132,34 +133,14 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Testimonials Section */}
+          {/* Testimonials Section (NOW A SLIDESHOW) */}
           <div className="pb-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <h2 className="text-4xl font-extrabold text-brand-dark mb-16">Success Stories</h2>
+              
+              {/* Rendering the new component here */}
+              <TestimonialSlideshow testimonials={testimonials} />
 
-              {testimonials.length === 0 ? (
-                <p className="text-slate-500">No testimonials published yet.</p>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto text-left">
-                  {testimonials.map((t) => (
-                    <div key={t.id} className="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 relative">
-                      <div className="flex gap-1 text-brand-accent mb-6">
-                        {[...Array(5)].map((_, i) => <Star key={i} className="fill-current w-5 h-5" />)}
-                      </div>
-                      <p className="text-slate-700 text-lg italic mb-8 font-medium">"{t.review}"</p>
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-brand-primary text-white rounded-full flex items-center justify-center font-bold text-xl shadow-inner">
-                          {t.name.charAt(0)}
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-brand-dark text-lg">{t.name}</h4>
-                          <p className="text-sm font-semibold text-brand-primary">{t.course}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
