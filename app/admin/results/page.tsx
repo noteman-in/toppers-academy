@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { Phone, BarChart, Search } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
+import DeleteResultButton from "./DeleteResultButton"; // <-- Import the button
 
-// This forces Next.js to re-fetch data on every search
 export const dynamic = 'force-dynamic';
 
 export default async function AdminResultsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
@@ -60,13 +60,21 @@ export default async function AdminResultsPage({ searchParams }: { searchParams:
                   <p className="text-xs text-slate-400 mt-2">Taken on {dateStr}</p>
                 </div>
                 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center gap-6 min-w-[250px] justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Score</p>
-                    <p className="text-2xl font-extrabold text-brand-dark">{attempt.score} / {attempt.totalQuestions}</p>
+                {/* Score Card & Delete Button */}
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-3 min-w-[280px]">
+                  <div className="flex items-center justify-between w-full">
+                    <div>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Score</p>
+                      <p className="text-2xl font-extrabold text-brand-dark">{attempt.score} / {attempt.totalQuestions}</p>
+                    </div>
+                    <div className={`px-4 py-2 rounded-lg font-bold text-sm ${percentage >= 40 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {percentage}%
+                    </div>
                   </div>
-                  <div className={`px-4 py-2 rounded-lg font-bold text-sm ${percentage >= 40 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {percentage}%
+                  
+                  {/* The Delete Button */}
+                  <div className="border-t border-slate-200 pt-2 flex justify-end w-full">
+                    <DeleteResultButton id={attempt.id} />
                   </div>
                 </div>
               </div>
