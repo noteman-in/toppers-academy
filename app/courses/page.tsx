@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
-import CourseImage from "@/components/CourseImage"; // <-- Import the new component
+import CourseImage from "@/components/CourseImage";
 
 export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const resolvedParams = await searchParams;
@@ -53,7 +53,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {courses.map((course) => (
-                <div key={course.id} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative group">
+                <div key={course.id} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative group cursor-pointer">
                   
                   <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden flex items-center justify-center">
                      <CourseImage src={course.imageUrl || ""} alt={course.title} title={course.title} />
@@ -72,10 +72,15 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
                     <h3 className="text-xl font-bold text-brand-dark mb-3">{course.title}</h3>
                     <p className="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">{course.description}</p>
                     
-                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                    <div className="flex flex-col mt-auto pt-4 border-t border-slate-100 gap-3">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-sm text-slate-500 font-medium">Price:</span>
+                        <span className="text-2xl font-extrabold text-brand-dark">{course.price || "Contact Us"}</span>
+                      </div>
+                      
                       <Link 
                         href={`/courses/${course.slug}`} 
-                        className="flex items-center justify-center w-full gap-2 bg-brand-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg"
+                        className="flex items-center justify-center w-full gap-2 bg-brand-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg cursor-pointer"
                       >
                         View Details <ArrowRight className="w-4 h-4" />
                       </Link>

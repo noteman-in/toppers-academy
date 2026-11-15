@@ -91,7 +91,8 @@ model Course {
   subject        String
   imageUrl       String?
   purchaseUrl    String
-  webPurchaseUrl String?  // <-- ADDED THIS FIELD
+  webPurchaseUrl String?  
+  price          String?  // <-- ADDED PRICE FIELD HERE
   isFeatured     Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

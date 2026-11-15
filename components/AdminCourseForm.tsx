@@ -94,6 +94,11 @@ export default function AdminCourseForm() {
           <label className="block text-sm font-bold text-slate-700 mb-1">Short Description</label>
           <textarea name="description" required rows={3} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-primary resize-none" placeholder="What will students learn?" />
         </div>
+
+        <div>
+          <label className="block text-sm font-bold text-slate-700 mb-1">Price (Optional)</label>
+          <input type="text" name="price" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-primary" placeholder="e.g. ₹4,999" />
+        </div>
         
         <div>
           <label className="block text-sm font-bold text-slate-700 mb-1">Purchase URL (App Link)</label>
@@ -110,7 +115,7 @@ export default function AdminCourseForm() {
           <label htmlFor="isFeatured" className="text-sm font-bold text-slate-700">Feature on Homepage</label>
         </div>
         
-        <button type="submit" disabled={isPending} className="w-full bg-brand-primary text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors mt-2 shadow-md disabled:opacity-50">
+        <button type="submit" disabled={isPending} className="w-full bg-brand-primary text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors mt-2 shadow-md disabled:opacity-50 cursor-pointer">
           {isPending ? "Publishing..." : "Publish Course"}
         </button>
       </form>

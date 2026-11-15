@@ -11,6 +11,7 @@ export async function createCourse(formData: FormData): Promise<{ success?: bool
   const subject = formData.get("subject") as string;
   const purchaseUrl = formData.get("purchaseUrl") as string;
   const webPurchaseUrl = formData.get("webPurchaseUrl") as string;
+  const price = formData.get("price") as string;
   const isFeatured = formData.get("isFeatured") === "on";
   const imageFile = formData.get("image") as File;
 
@@ -22,7 +23,7 @@ export async function createCourse(formData: FormData): Promise<{ success?: bool
   const imageUrl = await uploadToCloudinary(imageFile, "toppers_courses");
 
   await prisma.course.create({
-    data: { title, slug, description, classLevel, subject, purchaseUrl, webPurchaseUrl, isFeatured, imageUrl },
+    data: { title, slug, description, classLevel, subject, purchaseUrl, webPurchaseUrl, price, isFeatured, imageUrl },
   });
 
   revalidatePath("/admin/courses");
@@ -47,6 +48,7 @@ export async function updateCourse(formData: FormData) {
   const subject = formData.get("subject") as string;
   const purchaseUrl = formData.get("purchaseUrl") as string;
   const webPurchaseUrl = formData.get("webPurchaseUrl") as string;
+  const price = formData.get("price") as string;
   const isFeatured = formData.get("isFeatured") === "on";
   const imageFile = formData.get("image") as File;
 
@@ -56,7 +58,7 @@ export async function updateCourse(formData: FormData) {
   await prisma.course.update({
     where: { id },
     data: {
-      title, slug, description, classLevel, subject, purchaseUrl, webPurchaseUrl, isFeatured,
+      title, slug, description, classLevel, subject, purchaseUrl, webPurchaseUrl, price, isFeatured,
       ...(imageUrl && { imageUrl }),
     },
   });

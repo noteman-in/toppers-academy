@@ -59,6 +59,11 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
             <label className="block text-sm font-bold text-slate-700 mb-1">Short Description</label>
             <textarea name="description" defaultValue={course.description} required rows={4} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none resize-none" />
           </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Price (Optional)</label>
+            <input type="text" name="price" defaultValue={course.price || ""} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none" />
+          </div>
           
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-1">Purchase URL (App Link)</label>
@@ -75,7 +80,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
             <label htmlFor="isFeatured" className="text-sm font-bold text-slate-700">Feature on Homepage</label>
           </div>
           
-          <button type="submit" className="flex items-center justify-center gap-2 w-full bg-brand-primary text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors mt-4 shadow-md">
+          <button type="submit" className="flex items-center justify-center gap-2 w-full bg-brand-primary text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors mt-4 shadow-md cursor-pointer">
             <Save className="w-5 h-5" /> Save Changes
           </button>
         </form>
