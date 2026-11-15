@@ -1,6 +1,9 @@
-import Header from "@/components/Header";
+import HeaderWrapper from "@/components/HeaderWrapper";
 import Footer from "@/components/Footer";
 import { Trophy, Star } from "lucide-react";
+
+// THIS LINE FIXES THE NETLIFY BUILD ERROR
+export const dynamic = 'force-dynamic';
 
 export default function AchievementsPage() {
   const toppers = [
@@ -11,7 +14,7 @@ export default function AchievementsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F4F6F9] bg-dot-pattern">
-      <Header />
+      <HeaderWrapper />
       <main className="flex-grow pt-28 pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
