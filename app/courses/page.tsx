@@ -73,9 +73,11 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
                     <p className="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">{course.description}</p>
                     
                     <div className="flex flex-col mt-auto pt-4 border-t border-slate-100 gap-3">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-sm text-slate-500 font-medium">Price:</span>
-                        <span className="text-2xl font-extrabold text-brand-dark">{course.price || "Contact Us"}</span>
+                      
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-extrabold text-brand-dark">
+                          {course.price ? `₹${course.price}` : "Contact Us"}
+                        </span>
                       </div>
                       
                       <Link 
