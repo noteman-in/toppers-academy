@@ -9,16 +9,16 @@ export default async function CoursesAdminPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  const secretPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'ops-master-2026';
+
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold text-brand-dark mb-8">Manage Courses</h1>
       
       <div className="grid md:grid-cols-2 gap-8">
         
-        {/* The Admin Form Component */}
         <AdminCourseForm />
 
-        {/* List of existing courses with Edit/Delete */}
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-brand-dark mb-4">Published Courses</h2>
           {courses.length === 0 ? (
@@ -40,7 +40,7 @@ export default async function CoursesAdminPage() {
                   </div>
                   
                   <div className="flex gap-2 mt-4">
-                    <Link href={`/admin/courses/edit/${course.id}`} className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                    <Link href={`/${secretPath}/courses/edit/${course.id}`} className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
                       <Pencil className="w-3 h-3" /> Edit
                     </Link>
                     <form action={deleteCourse}>

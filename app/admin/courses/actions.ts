@@ -1,6 +1,7 @@
 "use server";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export async function createCourse(formData: FormData): Promise<{ success?: boolean; error?: string }> {
@@ -63,4 +64,7 @@ export async function updateCourse(formData: FormData) {
   revalidatePath("/admin/courses");
   revalidatePath("/");
   revalidatePath("/courses");
+
+  const secretPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'ops-master-2026';
+  redirect(`/${secretPath}/courses`);
 }
