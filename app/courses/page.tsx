@@ -1,3 +1,6 @@
+"use client"; // We need this for the fallback image
+
+import { useState } from "react";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
@@ -6,11 +9,34 @@ import Link from "next/link";
 import Image from "next/image";
 import SearchBar from "@/components/SearchBar";
 
+// A tiny helper component to handle broken image links
+function ImageWithFallback({ src, alt, title }: { src: string, alt: string, title: string }) {
+  const [error, setError] = useState(false);
+
+  if (error || !src) {
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-brand-dark to-brand-primary/80 flex items-center justify-center p-6 text-center">
+        <h3 className="text-white font-extrabold text-2xl leading-tight drop-shadow-md">{title}</h3>
+      </div>
+    );
+  }
+
+  return (
+    <Image 
+      src={src} 
+      alt={alt} 
+      fill 
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
+      className="object-contain group-hover:scale-105 transition-transform duration-500" 
+      onError={() => setError(true)}
+    />
+  );
+}
+
 export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const resolvedParams = await searchParams;
   const query = resolvedParams.q || "";
 
-  // Fetch courses with the search filter
   const courses = await prisma.course.findMany({
     where: query ? {
       OR: [
@@ -36,7 +62,6 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
               Master Accountancy, Economics, and Business Studies with structured courses designed by Vikrant Ahuja.
             </p>
             
-            {/* Search Bar */}
             <div className="flex justify-center">
               <SearchBar placeholder="Search by course name, subject, or class..." />
             </div>
@@ -57,25 +82,11 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
               {courses.map((course) => (
                 <div key={course.id} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative group">
                   
-                  {/* FIXED IMAGE CONTAINER FOR MOBILE */}
                   <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden flex items-center justify-center">
-                     {course.imageUrl ? (
-                        <Image 
-                          src={course.imageUrl} 
-                          alt={course.title} 
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="object-contain group-hover:scale-105 transition-transform duration-500" 
-                        />
-                     ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-brand-dark to-brand-primary/80 flex items-center justify-center p-6 text-center group-hover:scale-105 transition-transform duration-500">
-                          <h3 className="text-white font-extrabold text-2xl leading-tight drop-shadow-md">{course.title}</h3>
-                        </div>
-                     )}
+                     <ImageWithFallback src={course.imageUrl || ""} alt={course.title} title={course.title} />
                   </div>
 
                   <div className="p-6 flex-grow flex flex-col bg-white">
-                    {/* CLASS AND SUBJECT TAGS */}
                     <div className="flex items-center gap-3 mb-2">
                       <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
                         {course.classLevel}
