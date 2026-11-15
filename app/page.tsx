@@ -4,8 +4,8 @@ import { ArrowRight, BookOpen, Star } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import HeaderWrapper from "@/components/HeaderWrapper";
-import Image from "next/image";
-import EnrollButton from "@/components/EnrollButton"; // <-- Imported the Smart Button
+import EnrollButton from "@/components/EnrollButton";
+import CourseImage from "@/components/CourseImage";
 
 export default async function Home() {
   const testimonials = await prisma.testimonial.findMany({
@@ -95,21 +95,9 @@ export default async function Home() {
                   featuredCourses.map((course) => (
                     <div key={course.id} className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative">
 
-                      {/* FIXED IMAGE CONTAINER FOR MOBILE */}
+                      {/* FIXED IMAGE CONTAINER */}
                       <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden group flex items-center justify-center">
-                        {course.imageUrl ? (
-                          <Image 
-                            src={course.imageUrl} 
-                            alt={course.title} 
-                            fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            className="object-contain group-hover:scale-105 transition-transform duration-500" 
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-brand-dark to-brand-primary/80 flex items-center justify-center p-6 text-center group-hover:scale-105 transition-transform duration-500">
-                            <h3 className="text-white font-extrabold text-2xl leading-tight drop-shadow-md">{course.title}</h3>
-                          </div>
-                        )}
+                        <CourseImage src={course.imageUrl || ""} alt={course.title} title={course.title} />
                       </div>
 
                       <div className="p-6 flex-grow flex flex-col bg-white">
@@ -126,7 +114,6 @@ export default async function Home() {
                         <p className="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">{course.description}</p>
                         
                         <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
-                          {/* SMART ENROL BUTTON */}
                           <EnrollButton 
                             mobileUrl={course.purchaseUrl} 
                             webUrl={course.webPurchaseUrl} 
@@ -146,7 +133,6 @@ export default async function Home() {
           </div>
 
           {/* Testimonials Section */}
-                    {/* Testimonials Section */}
           <div className="pb-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <h2 className="text-4xl font-extrabold text-brand-dark mb-16">Success Stories</h2>

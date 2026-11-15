@@ -15,7 +15,7 @@ export async function uploadToCloudinary(file: File, folder: string = "toppers_a
     
     const result = await new Promise<any>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { folder, resource_type: "auto" }, // "auto" handles both images and PDFs
+        { folder, resource_type: "auto" },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
