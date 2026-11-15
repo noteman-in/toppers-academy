@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { LogOut, LayoutDashboard, BookOpen, Users, FileText, Settings, CheckSquare, BarChart } from "lucide-react";
+import { LogOut, LayoutDashboard, BookOpen, Users, FileText, Settings, CheckSquare, BarChart, PenTool } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
-// THIS PREVENTS NEXT.JS FROM CACHING THE LAYOUT
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -16,39 +15,39 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const headersList = await headers();
   const originalPath = headersList.get('x-original-path') || "";
   const isLoginHeader = headersList.get('x-is-login-page') === 'true';
-  
-  // BULLETPROOF CHECK: If either header says it's login, hide the sidebar
   const isLoginPage = isLoginHeader || originalPath.includes('/login');
-  
-  const secretPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'secure-admin-panel';
+  const secretPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'ops-master-2026';
 
   let isOwner = false;
+  let academyName = "Toppers Academy";
+
   if (session) {
     const dbUser = await prisma.user.findUnique({ where: { id: session.user.id } });
     isOwner = dbUser?.role === "OWNER";
+    
+    // Fetch the dynamic academy name
+    const settings = await prisma.siteSettings.findUnique({ where: { id: "global" } });
+    if (settings?.academyName) academyName = settings.academyName;
   }
 
-  // 1. If no session and NOT on login page -> Force redirect to login
   if (!session && !isLoginPage) {
     redirect(`/${secretPath}/login`);
   }
 
-  // 2. If already logged in and trying to access login page -> Redirect to dashboard
   if (session && isLoginPage) {
     redirect(`/${secretPath}`);
   }
 
-  // 3. If on login page, just render the form WITHOUT the sidebar
   if (isLoginPage) {
     return <>{children}</>;
   }
 
-  // 4. Otherwise, render the secure dashboard layout with the sidebar
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <aside className="w-64 bg-brand-dark text-white flex flex-col hidden md:flex shadow-xl z-20 sticky top-0 h-screen">
         <div className="h-20 flex items-center px-6 border-b border-white/10 shrink-0">
-          <span className="text-xl font-bold tracking-tight text-white">Toppers Admin</span>
+          {/* DYNAMIC ACADEMY NAME HERE */}
+          <span className="text-xl font-bold tracking-tight text-white">{academyName} Admin</span>
         </div>
 
         <nav className="flex-1 py-6 space-y-2 px-4 overflow-y-auto">

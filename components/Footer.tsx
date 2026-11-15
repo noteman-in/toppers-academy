@@ -4,10 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export default async function Footer() {
   const settings = await prisma.siteSettings.findUnique({ where: { id: "global" } });
-
   const academyName = settings?.academyName || "Toppers Academy";
-  const email = settings?.contactEmail || "contact@toppersacademy.com";
-  const phone = settings?.contactPhone || "+91 98765 43210";
 
   return (
     <footer className="bg-brand-dark text-white pt-16 pb-8">
@@ -18,6 +15,7 @@ export default async function Footer() {
             <div className="bg-brand-primary text-white p-2 rounded-lg">
               <GraduationCap className="w-6 h-6" />
             </div>
+            {/* DYNAMIC ACADEMY NAME HERE */}
             <h2 className="text-2xl font-bold text-white">{academyName}</h2>
           </div>
           <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
@@ -46,8 +44,7 @@ export default async function Footer() {
             <li><Link href="/achievements" className="hover:text-brand-primary transition-colors">Our Toppers</Link></li>
             <li><Link href="/faq" className="hover:text-brand-primary transition-colors">FAQ</Link></li>
             <li><Link href="/contact" className="hover:text-brand-primary transition-colors">Contact Us</Link></li>
-            <li className="pt-2">{email}</li>
-            <li>{phone}</li>
+            {/* REMOVED EMAIL AND PHONE HERE */}
           </ul>
         </div>
       </div>
