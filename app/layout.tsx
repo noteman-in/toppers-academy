@@ -16,7 +16,14 @@ export const metadata: Metadata = {
 };
 
 const getCachedSettings = unstable_cache(
-  async () => await prisma.siteSettings.findUnique({ where: { id: "global" } }),
+  async () => {
+    try {
+      return await prisma.siteSettings.findUnique({ where: { id: "global" } });
+    } catch (error) {
+      console.error("Failed to fetch settings (DB might be down):", error);
+      return null; // Prevents the whole build from crashing
+    }
+  },
   ['site-settings'],
   { revalidate: 3600 }
 );
@@ -31,8 +38,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <AnalyticsTracker />
         {children}
         <WhatsAppButton phoneNumber={waNumber} />
-        
-        {/* THIS SHOWS THE ERROR POPUPS ON PUBLIC PAGES */}
         <Toaster position="bottom-right" richColors />
       </body>
     </html>
