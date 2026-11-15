@@ -10,18 +10,29 @@ import { unstable_cache } from "next/cache";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
-export const metadata: Metadata = {
-  title: "Toppers Academy of Commerce",
-  description: "Learn Commerce with Vikrant Ahuja, bringing over 32 years of teaching experience.",
-};
+// 1. MAKE METADATA DYNAMIC
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await prisma.siteSettings.findUnique({ where: { id: "global" } });
+  const academyName = settings?.academyName || "Commerce by Vikrant Ahuja";
+
+  return {
+    title: academyName,
+    description: "Learn Commerce with Vikrant Ahuja, bringing over 32 years of teaching experience.",
+    openGraph: {
+      title: academyName,
+      description: "Learn Commerce with Vikrant Ahuja, bringing over 32 years of teaching experience.",
+    }
+  };
+}
 
 const getCachedSettings = unstable_cache(
   async () => {
     try {
+      if (process.env.NETLIFY === 'true') return null; 
       return await prisma.siteSettings.findUnique({ where: { id: "global" } });
     } catch (error) {
-      console.error("Failed to fetch settings (DB might be down):", error);
-      return null; // Prevents the whole build from crashing
+      console.error("DB fetch failed:", error);
+      return null; 
     }
   },
   ['site-settings'],
