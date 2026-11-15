@@ -1,61 +1,101 @@
+import HeaderWrapper from "@/components/HeaderWrapper";
+import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
-import { deleteCourse } from "./actions";
-import AdminCourseForm from "@/components/AdminCourseForm";
+import { BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Pencil, Trash2, Image as ImageIcon } from "lucide-react";
+import SearchBar from "@/components/SearchBar";
+import CourseImage from "@/components/CourseImage";
 
-export default async function CoursesAdminPage() {
+export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const resolvedParams = await searchParams;
+  const query = resolvedParams.q || "";
+
   const courses = await prisma.course.findMany({
+    where: query ? {
+      OR: [
+        { title: { contains: query, mode: "insensitive" } },
+        { subject: { contains: query, mode: "insensitive" } },
+        { classLevel: { contains: query, mode: "insensitive" } },
+      ]
+    } : undefined,
     orderBy: { createdAt: "desc" },
   });
 
-  const secretPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'ops-master-2026';
-
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold text-brand-dark mb-8">Manage Courses</h1>
-      
-      <div className="grid md:grid-cols-2 gap-8">
-        
-        <AdminCourseForm />
+    <div className="min-h-screen flex flex-col bg-[#F4F6F9] bg-dot-pattern">
+      <HeaderWrapper />
+      <main className="flex-grow pt-28 pb-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <h1 className="text-4xl lg:text-5xl font-extrabold text-brand-dark mb-6">
+              Explore Our <span className="text-brand-primary">Courses</span>
+            </h1>
+            <p className="text-lg text-slate-600 mb-8">
+              Master Accountancy, Economics, and Business Studies with structured courses designed by Vikrant Ahuja.
+            </p>
+            
+            <div className="flex justify-center">
+              <SearchBar placeholder="Search by course name, subject, or class..." />
+            </div>
+          </div>
 
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-brand-dark mb-4">Published Courses</h2>
           {courses.length === 0 ? (
-            <p className="text-slate-500 bg-white p-6 rounded-2xl border border-slate-200 text-center">No courses added yet.</p>
+            <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm max-w-4xl mx-auto">
+              <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-brand-dark mb-2">
+                {query ? "No courses found" : "No courses available yet"}
+              </h3>
+              <p className="text-slate-500 mb-6">
+                {query ? `We couldn't find any results for "${query}". Try a different search.` : "Check back soon!"}
+              </p>
+            </div>
           ) : (
-            courses.map((course) => (
-              <div key={course.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex gap-4">
-                <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center text-slate-300">
-                  {course.imageUrl ? <img src={course.imageUrl} className="w-full h-full object-cover" /> : <ImageIcon className="w-6 h-6" />}
-                </div>
-                
-                <div className="flex-grow">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-bold text-brand-dark text-lg leading-tight">{course.title}</h3>
-                      <p className="text-xs text-brand-primary font-bold mt-1">{course.classLevel} • {course.subject}</p>
-                    </div>
-                    {course.isFeatured && <span className="text-[10px] bg-brand-accent/20 text-brand-accent px-2 py-1 rounded-md font-bold uppercase">Featured</span>}
-                  </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {courses.map((course) => (
+                <div key={course.id} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative group cursor-pointer">
                   
-                  <div className="flex gap-2 mt-4">
-                    <Link href={`/${secretPath}/courses/edit/${course.id}`} className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
-                      <Pencil className="w-3 h-3" /> Edit
-                    </Link>
-                    <form action={deleteCourse}>
-                      <input type="hidden" name="id" value={course.id} />
-                      <button type="submit" className="flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
-                        <Trash2 className="w-3 h-3" /> Delete
-                      </button>
-                    </form>
+                  <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden flex items-center justify-center">
+                     <CourseImage src={course.imageUrl || ""} alt={course.title} title={course.title} />
+                  </div>
+
+                  <div className="p-6 flex-grow flex flex-col bg-white">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                        {course.classLevel}
+                      </span>
+                      <span className="text-xs font-bold text-brand-accent uppercase tracking-wider">
+                        {course.subject}
+                      </span>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-brand-dark mb-3">{course.title}</h3>
+                    <p className="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">{course.description}</p>
+                    
+                    <div className="flex flex-col mt-auto pt-4 border-t border-slate-100 gap-3">
+                      
+                      {/* PRICE DISPLAY WITH RUPEE SYMBOL */}
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-extrabold text-brand-dark">
+                          {course.price ? `₹${course.price}` : "Contact Us"}
+                        </span>
+                      </div>
+                      
+                      <Link 
+                        href={`/courses/${course.slug}`} 
+                        className="flex items-center justify-center w-full gap-2 bg-brand-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg cursor-pointer"
+                      >
+                        View Details <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

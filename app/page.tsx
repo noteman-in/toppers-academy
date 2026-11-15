@@ -9,13 +9,11 @@ import CourseImage from "@/components/CourseImage";
 import TestimonialTicker from "@/components/TestimonialTicker";
 
 export default async function Home() {
-  // Fetch up to 20 reviews to make the ticker look full
   const rawTestimonials = await prisma.testimonial.findMany({
     take: 20,
     orderBy: { createdAt: "desc" },
   });
 
-  // Randomize the order of the reviews
   const testimonials = rawTestimonials.sort(() => 0.5 - Math.random());
 
   const featuredCourses = await prisma.course.findMany({
@@ -26,15 +24,12 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header sits on top of the dark hero */}
       <div className="absolute top-0 w-full z-50">
         <HeaderWrapper />
       </div>
 
       <main className="flex-grow">
-        {/* Dark, Creative Hero Section */}
         <div className="relative bg-[#0F172A] pt-40 pb-32 lg:pt-48 lg:pb-48 overflow-hidden">
-          {/* Glowing Background Orbs */}
           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-primary/20 rounded-full blur-[120px] pointer-events-none"></div>
           <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-brand-accent/20 rounded-full blur-[100px] pointer-events-none"></div>
 
@@ -64,28 +59,24 @@ export default async function Home() {
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link
                   href="/courses"
-                  className="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-600 shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all hover:-translate-y-1"
+                  className="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-600 shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all hover:-translate-y-1 cursor-pointer"
                 >
                   Explore Courses <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
                   href="/free-resources"
-                  className="flex items-center justify-center gap-2 bg-white/10 text-white border border-white/20 px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 backdrop-blur-sm transition-all"
+                  className="flex items-center justify-center gap-2 bg-white/10 text-white border border-white/20 px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 backdrop-blur-sm transition-all cursor-pointer"
                 >
                   <BookOpen className="w-5 h-5" /> Free Study Material
                 </Link>
               </div>
             </div>
 
-            {/* Teacher Slideshow Component */}
             <TeacherSlideshow />
           </div>
         </div>
 
-        {/* Patterned Background for the rest of the page */}
         <div className="bg-[#F4F6F9] bg-dot-pattern">
-
-          {/* Featured Courses Section */}
           <div className="py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-16">
@@ -98,7 +89,7 @@ export default async function Home() {
                   <div className="col-span-3 text-center text-slate-500 py-10 bg-white rounded-xl border border-slate-200">No featured courses yet. Add some from the Admin panel!</div>
                 ) : (
                   featuredCourses.map((course) => (
-                    <div key={course.id} className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative">
+                    <div key={course.id} className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative cursor-pointer">
 
                       <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden group flex items-center justify-center">
                         <CourseImage src={course.imageUrl || ""} alt={course.title} title={course.title} />
@@ -117,7 +108,15 @@ export default async function Home() {
                         <h3 className="text-xl font-bold text-brand-dark mb-3">{course.title}</h3>
                         <p className="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">{course.description}</p>
                         
-                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                        <div className="flex flex-col mt-auto pt-4 border-t border-slate-100 gap-3">
+                          
+                          {/* PRICE DISPLAY WITH RUPEE SYMBOL */}
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-extrabold text-brand-dark">
+                              {course.price ? `₹${course.price}` : "Contact Us"}
+                            </span>
+                          </div>
+                          
                           <EnrollButton 
                             mobileUrl={course.purchaseUrl} 
                             webUrl={course.webPurchaseUrl} 
@@ -129,22 +128,18 @@ export default async function Home() {
                 )}
               </div>
               <div className="text-center mt-12">
-                <Link href="/courses" className="inline-flex items-center gap-2 text-brand-primary font-bold hover:text-brand-dark transition-colors bg-white px-6 py-3 rounded-full shadow-sm border border-slate-200">
+                <Link href="/courses" className="inline-flex items-center gap-2 text-brand-primary font-bold hover:text-brand-dark transition-colors bg-white px-6 py-3 rounded-full shadow-sm border border-slate-200 cursor-pointer">
                   View All Courses <ArrowRight className="w-5 h-5" />
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* Testimonials Ticker Section */}
           <div className="pb-24 overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10">
               <h2 className="text-4xl font-extrabold text-brand-dark">Success Stories</h2>
             </div>
-            
-            {/* The new infinite scrolling ticker */}
             <TestimonialTicker testimonials={testimonials} />
-            
           </div>
 
         </div>
