@@ -8,7 +8,6 @@ export async function createTest(formData: FormData) {
   const subject = formData.get("subject") as string;
   const classLevel = formData.get("classLevel") as string;
   const timeLimit = parseInt(formData.get("timeLimit") as string);
-  
   const questionsData = formData.get("questions") as string;
   const questions = JSON.parse(questionsData);
 
@@ -35,4 +34,10 @@ export async function createTest(formData: FormData) {
 
   revalidatePath("/admin/tests");
   redirect("/admin/tests");
+}
+
+export async function deleteTest(formData: FormData) {
+  const id = formData.get("id") as string;
+  await prisma.test.delete({ where: { id } });
+  revalidatePath("/admin/tests");
 }

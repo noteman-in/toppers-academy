@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -15,6 +16,7 @@ model User {
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
   twoFactorEnabled Boolean     @default(false)
+  role             String      @default("EDITOR")
   sessions         Session[]
   accounts         Account[]
   twoFactors       TwoFactor[]
@@ -81,17 +83,18 @@ model Testimonial {
 }
 
 model Course {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String
-  classLevel  String
-  subject     String
-  imageUrl    String?
-  purchaseUrl String
-  isFeatured  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  description    String
+  classLevel     String
+  subject        String
+  imageUrl       String?
+  purchaseUrl    String
+  webPurchaseUrl String?  // <-- ADDED THIS FIELD
+  isFeatured     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Resource {
@@ -102,16 +105,6 @@ model Resource {
   subject     String
   fileUrl     String
   createdAt   DateTime @default(now())
-}
-
-model BlogPost {
-  id        String   @id @default(cuid())
-  title     String
-  slug      String   @unique
-  excerpt   String
-  content   String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model TestSeries {
@@ -136,7 +129,6 @@ model Enquiry {
   createdAt DateTime @default(now())
 }
 
-// --- SINGLE CORRECT VERSION OF SITE SETTINGS ---
 model SiteSettings {
   id               String   @id @default("global")
   academyName      String   @default("Toppers Academy of Commerce")
@@ -150,7 +142,6 @@ model SiteSettings {
   announcementLink String   @default("/free-resources")
 }
 
-// --- SINGLE CORRECT VERSION OF TEST MODELS ---
 model Test {
   id          String        @id @default(cuid())
   title       String
@@ -183,4 +174,10 @@ model TestAttempt {
   totalQuestions Int
   createdAt      DateTime @default(now())
   test           Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  createdAt DateTime @default(now())
 }

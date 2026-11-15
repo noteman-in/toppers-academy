@@ -3,6 +3,9 @@ import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { prisma } from "@/lib/prisma";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
+import { Toaster } from "sonner";
+import { unstable_cache } from "next/cache";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -12,16 +15,25 @@ export const metadata: Metadata = {
   description: "Learn Commerce with Vikrant Ahuja, bringing over 32 years of teaching experience.",
 };
 
+const getCachedSettings = unstable_cache(
+  async () => await prisma.siteSettings.findUnique({ where: { id: "global" } }),
+  ['site-settings'],
+  { revalidate: 3600 }
+);
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Fetch settings for the WhatsApp button
-  const settings = await prisma.siteSettings.findUnique({ where: { id: "global" } });
+  const settings = await getCachedSettings();
   const waNumber = settings?.whatsappNumber || "919876543210";
 
   return (
     <html lang="en">
       <body className={`${inter.variable} ${outfit.variable} antialiased bg-slate-50`}>
+        <AnalyticsTracker />
         {children}
         <WhatsAppButton phoneNumber={waNumber} />
+        
+        {/* THIS SHOWS THE ERROR POPUPS ON PUBLIC PAGES */}
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

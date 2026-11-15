@@ -1,53 +1,81 @@
-import Header from "@/components/Header";
+import HeaderWrapper from "@/components/HeaderWrapper";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
 import { BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import SearchBar from "@/components/SearchBar";
 
-export default async function CoursesPage() {
+export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const resolvedParams = await searchParams;
+  const query = resolvedParams.q || "";
+
+  // Fetch courses with the search filter
   const courses = await prisma.course.findMany({
+    where: query ? {
+      OR: [
+        { title: { contains: query, mode: "insensitive" } },
+        { subject: { contains: query, mode: "insensitive" } },
+        { classLevel: { contains: query, mode: "insensitive" } },
+      ]
+    } : undefined,
     orderBy: { createdAt: "desc" },
   });
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F4F6F9] bg-dot-pattern">
-      <Header />
+      <HeaderWrapper />
       <main className="flex-grow pt-28 pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-10">
             <h1 className="text-4xl lg:text-5xl font-extrabold text-brand-dark mb-6">
               Explore Our <span className="text-brand-primary">Courses</span>
             </h1>
-            <p className="text-lg text-slate-600">
+            <p className="text-lg text-slate-600 mb-8">
               Master Accountancy, Economics, and Business Studies with structured courses designed by Vikrant Ahuja.
             </p>
+            
+            {/* Search Bar */}
+            <div className="flex justify-center">
+              <SearchBar placeholder="Search by course name, subject, or class..." />
+            </div>
           </div>
 
           {courses.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm max-w-4xl mx-auto">
               <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-brand-dark mb-2">No courses available yet</h3>
-              <p className="text-slate-500 mb-6">Check back soon!</p>
+              <h3 className="text-2xl font-bold text-brand-dark mb-2">
+                {query ? "No courses found" : "No courses available yet"}
+              </h3>
+              <p className="text-slate-500 mb-6">
+                {query ? `We couldn't find any results for "${query}". Try a different search.` : "Check back soon!"}
+              </p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {courses.map((course) => (
                 <div key={course.id} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative group">
                   
-                  {/* FIXED IMAGE CONTAINER */}
-                  <div className="h-56 bg-[#0F172A] relative border-b border-slate-100 overflow-hidden flex items-center justify-center">
+                  {/* FIXED IMAGE CONTAINER FOR MOBILE */}
+                  <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden flex items-center justify-center">
                      {course.imageUrl ? (
-                        <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <Image 
+                          src={course.imageUrl} 
+                          alt={course.title} 
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-contain group-hover:scale-105 transition-transform duration-500" 
+                        />
                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-300 group-hover:scale-110 transition-transform duration-500">
-                           <BookOpen className="w-16 h-16" />
+                        <div className="w-full h-full bg-gradient-to-br from-brand-dark to-brand-primary/80 flex items-center justify-center p-6 text-center group-hover:scale-105 transition-transform duration-500">
+                          <h3 className="text-white font-extrabold text-2xl leading-tight drop-shadow-md">{course.title}</h3>
                         </div>
                      )}
                   </div>
 
                   <div className="p-6 flex-grow flex flex-col bg-white">
-                    {/* FIXED CLASS AND SUBJECT TAGS */}
+                    {/* CLASS AND SUBJECT TAGS */}
                     <div className="flex items-center gap-3 mb-2">
                       <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
                         {course.classLevel}

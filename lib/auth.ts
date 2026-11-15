@@ -3,6 +3,8 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { twoFactor } from "better-auth/plugins";
 import { prisma } from "./prisma";
 
+const ownerEmails = (process.env.OWNER_EMAILS || "").split(",").map(e => e.trim().toLowerCase());
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -19,6 +21,25 @@ export const auth = betterAuth({
   trustedOrigins: [
     process.env.BETTER_AUTH_URL || "http://localhost:3000",
   ],
+  
+  // --- THIS AUTOMATICALLY GIVES OWNER ROLE ---
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const isOwner = ownerEmails.includes(user.email.toLowerCase());
+          return {
+            data: {
+              ...user,
+              role: isOwner ? "OWNER" : "EDITOR",
+            },
+          };
+        },
+      },
+    },
+  },
+  // -------------------------------------------
+
   plugins: [
     twoFactor({
       issuer: "Toppers Academy of Commerce",

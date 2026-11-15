@@ -4,6 +4,8 @@ import { ArrowRight, BookOpen, Star } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import HeaderWrapper from "@/components/HeaderWrapper";
+import Image from "next/image";
+import EnrollButton from "@/components/EnrollButton"; // <-- Imported the Smart Button
 
 export default async function Home() {
   const testimonials = await prisma.testimonial.findMany({
@@ -26,7 +28,7 @@ export default async function Home() {
 
       <main className="flex-grow">
         {/* Dark, Creative Hero Section */}
-        <div className="relative bg-[#0F172A] pt-28 pb-32 lg:pt-36 lg:pb-48 overflow-hidden">
+        <div className="relative bg-[#0F172A] pt-40 pb-32 lg:pt-48 lg:pb-48 overflow-hidden">
           {/* Glowing Background Orbs */}
           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-primary/20 rounded-full blur-[120px] pointer-events-none"></div>
           <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-brand-accent/20 rounded-full blur-[100px] pointer-events-none"></div>
@@ -43,7 +45,7 @@ export default async function Home() {
 
               <h1 className="text-5xl lg:text-7xl font-extrabold leading-[1.1] text-white">
                 Commerce Is Not Difficult. <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-yellow-300">
+                <span className="text-3xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-yellow-300 block mt-2">
                   It Just Needs The Right Teacher.
                 </span>
               </h1>
@@ -93,10 +95,16 @@ export default async function Home() {
                   featuredCourses.map((course) => (
                     <div key={course.id} className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative">
 
-                      {/* Image or Fallback Text Container */}
-                      <div className="h-56 bg-[#0F172A] relative border-b border-slate-100 overflow-hidden group flex items-center justify-center">
+                      {/* FIXED IMAGE CONTAINER FOR MOBILE */}
+                      <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden group flex items-center justify-center">
                         {course.imageUrl ? (
-                          <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <Image 
+                            src={course.imageUrl} 
+                            alt={course.title} 
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className="object-contain group-hover:scale-105 transition-transform duration-500" 
+                          />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-brand-dark to-brand-primary/80 flex items-center justify-center p-6 text-center group-hover:scale-105 transition-transform duration-500">
                             <h3 className="text-white font-extrabold text-2xl leading-tight drop-shadow-md">{course.title}</h3>
@@ -107,7 +115,7 @@ export default async function Home() {
                       <div className="p-6 flex-grow flex flex-col bg-white">
                         <div className="flex items-center gap-3 mb-2">
                           <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
-                            Class {course.classLevel}
+                            {course.classLevel}
                           </span>
                           <span className="text-xs font-bold text-brand-accent uppercase tracking-wider">
                             {course.subject}
@@ -116,10 +124,13 @@ export default async function Home() {
 
                         <h3 className="text-xl font-bold text-brand-dark mb-3">{course.title}</h3>
                         <p className="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">{course.description}</p>
+                        
                         <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
-                          <a href={course.purchaseUrl} target="_blank" rel="noopener noreferrer" className="w-full text-center bg-brand-dark text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-md">
-                            Enrol Now
-                          </a>
+                          {/* SMART ENROL BUTTON */}
+                          <EnrollButton 
+                            mobileUrl={course.purchaseUrl} 
+                            webUrl={course.webPurchaseUrl} 
+                          />
                         </div>
                       </div>
                     </div>
@@ -135,7 +146,8 @@ export default async function Home() {
           </div>
 
           {/* Testimonials Section */}
-          <div className="py-24">
+                    {/* Testimonials Section */}
+          <div className="pb-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <h2 className="text-4xl font-extrabold text-brand-dark mb-16">Success Stories</h2>
 

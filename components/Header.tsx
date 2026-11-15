@@ -86,9 +86,9 @@ export default function Header({
           </button>
         </div>
 
-        {/* Mobile Menu */}
+                {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-[#0F172A] border-b border-white/10 shadow-2xl py-4 px-4 flex flex-col space-y-2">
+          <div className="md:hidden fixed top-[80px] left-0 w-full h-[calc(100vh-80px)] bg-[#0F172A] border-b border-white/10 shadow-2xl py-4 px-4 flex flex-col space-y-2 overflow-y-auto z-50">
             {navLinks.map((item) => (
               <Link key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)} className="text-slate-300 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl font-medium transition-colors">
                 {item.name}

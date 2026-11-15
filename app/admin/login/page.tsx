@@ -5,10 +5,8 @@ import { authClient } from "@/lib/auth-client";
 import { Lock, Mail, GraduationCap } from "lucide-react";
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,19 +16,14 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const { error } = await authClient.signIn.email({ email, password });
-        if (error) throw new Error(error.message);
-      } else {
-        const { error } = await authClient.signUp.email({ email, password, name });
-        if (error) throw new Error(error.message);
-      }
+      const { error } = await authClient.signIn.email({ email, password });
+      if (error) throw new Error(error.message);
       
-      // FORCE HARD RELOAD to ensure the server sees the new cookie
-      window.location.href = "/admin"; 
+      // Redirect to your hidden admin path after successful login
+      window.location.href = `/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'secure-admin-panel'}`;
       
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      setError(err.message || "Invalid email or password");
       setLoading(false);
     }
   };
@@ -47,21 +40,13 @@ export default function LoginPage() {
           <div className="bg-brand-primary text-white p-3 rounded-2xl inline-flex mb-4 shadow-lg shadow-brand-primary/30">
             <GraduationCap className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-extrabold text-brand-dark mb-2">
-            {isLogin ? "Admin Login" : "Create Account"}
-          </h1>
-          <p className="text-slate-500 font-medium">Toppers Academy of Commerce</p>
+          <h1 className="text-3xl font-extrabold text-brand-dark mb-2">Admin Access</h1>
+          <p className="text-slate-500 font-medium">Authorized Personnel Only</p>
         </div>
 
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl mb-6 text-sm font-medium border border-red-100">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
-              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-transparent outline-none transition-all" placeholder="Vikrant Ahuja" />
-            </div>
-          )}
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-2">Email</label>
             <div className="relative">
@@ -77,14 +62,12 @@ export default function LoginPage() {
             </div>
           </div>
           <button type="submit" disabled={loading} className="w-full bg-brand-primary text-white py-3.5 rounded-xl font-bold text-lg hover:bg-blue-600 shadow-lg shadow-brand-primary/30 transition-all disabled:opacity-70 mt-4">
-            {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+            {loading ? "Authenticating..." : "Sign In"}
           </button>
         </form>
 
-        <div className="mt-8 text-center">
-          <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-sm font-bold text-slate-500 hover:text-brand-primary transition-colors">
-            {isLogin ? "First time? Create your Owner account" : "Already have an account? Sign in"}
-          </button>
+        <div className="mt-8 text-center text-sm font-bold text-slate-400">
+          <p>Toppers Academy CMS</p>
         </div>
       </div>
     </div>

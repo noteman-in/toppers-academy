@@ -12,5 +12,8 @@ export async function submitTestAttempt(data: { testId: string, name: string, ph
       totalQuestions: data.total,
     }
   });
+
+  // This tells Next.js to clear the cache for the admin pages
   revalidatePath("/admin/results");
+  revalidatePath("/admin");
 }

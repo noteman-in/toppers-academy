@@ -13,31 +13,52 @@ export default function TestInterface({ test }: { test: any }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{ score: number, total: number } | null>(null);
 
+  // --- NEW: Warning before leaving the page ---
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only show warning if the test has started, is NOT finished, and is NOT submitting
+      if (hasStarted && !result && !isSubmitting) {
+        e.preventDefault();
+        e.returnValue = ""; // Required for Chrome/Edge to show the prompt
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    
+    // Cleanup: remove listener when component unmounts
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasStarted, result, isSubmitting]);
+  // -------------------------------------------
+
   // Timer Logic
   useEffect(() => {
-    if (!hasStarted || result) return;
+    if (!hasStarted || result || isSubmitting) return;
     const timer = setInterval(() => {
-      setTimeLeft((prev: number) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleAutoSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeLeft((prev: number) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, [hasStarted, result]);
+  }, [hasStarted, result, isSubmitting]);
+
+  // Auto-submit when time hits 0
+  useEffect(() => {
+    if (timeLeft === 0 && hasStarted && !result && !isSubmitting) {
+      toast.error("Time is up! Auto-submitting your test.");
+      submitTest();
+    }
+  }, [timeLeft, hasStarted, result, isSubmitting]);
 
   const handleStart = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!student.name || !student.phone) return toast.error("Please fill all details");
-    setHasStarted(true);
-  };
+    
+    if (!student.name.trim()) return toast.error("Please enter your name");
+    
+    // Validate Indian Mobile Number (10 digits, starts with 6-9)
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(student.phone)) {
+      return toast.error("Please enter a valid 10-digit mobile number");
+    }
 
-  const handleAutoSubmit = () => {
-    toast.error("Time is up! Auto-submitting your test.");
-    submitTest();
+    setHasStarted(true);
   };
 
   const submitTest = async () => {
@@ -68,7 +89,6 @@ export default function TestInterface({ test }: { test: any }) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  // 1. Pre-Test Registration
   if (!hasStarted) {
     return (
       <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-200 max-w-md mx-auto">
@@ -76,7 +96,7 @@ export default function TestInterface({ test }: { test: any }) {
         <p className="text-slate-500 mb-6">Please enter your details to begin the {test.title}.</p>
         <form onSubmit={handleStart} className="space-y-4">
           <input type="text" placeholder="Your Full Name" required value={student.name} onChange={e => setStudent({...student, name: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary" />
-          <input type="tel" placeholder="WhatsApp Number" required value={student.phone} onChange={e => setStudent({...student, phone: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary" />
+          <input type="tel" placeholder="10-Digit Mobile Number" required maxLength={10} value={student.phone} onChange={e => setStudent({...student, phone: e.target.value.replace(/\D/g, '')})} className="w-full px-4 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary" />
           <button type="submit" className="w-full bg-brand-primary text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors shadow-md">
             Start Test
           </button>
@@ -85,7 +105,6 @@ export default function TestInterface({ test }: { test: any }) {
     );
   }
 
-  // 2. Post-Test Results
   if (result) {
     return (
       <div className="bg-white p-12 rounded-3xl shadow-xl border border-slate-200 max-w-md mx-auto text-center">
@@ -103,7 +122,6 @@ export default function TestInterface({ test }: { test: any }) {
     );
   }
 
-  // 3. The Actual Test UI
   return (
     <div className="max-w-3xl mx-auto">
       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center mb-8 sticky top-24 z-10">
