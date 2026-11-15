@@ -6,14 +6,17 @@ import { prisma } from "@/lib/prisma";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import EnrollButton from "@/components/EnrollButton";
 import CourseImage from "@/components/CourseImage";
-import TestimonialSlideshow from "@/components/TestimonialSlideshow"; // <-- Import new component
+import TestimonialTicker from "@/components/TestimonialTicker";
 
 export default async function Home() {
-  // Increased take to 5 so we have multiple reviews for the slideshow
-  const testimonials = await prisma.testimonial.findMany({
-    take: 5,
+  // Fetch up to 20 reviews to make the ticker look full
+  const rawTestimonials = await prisma.testimonial.findMany({
+    take: 20,
     orderBy: { createdAt: "desc" },
   });
+
+  // Randomize the order of the reviews
+  const testimonials = rawTestimonials.sort(() => 0.5 - Math.random());
 
   const featuredCourses = await prisma.course.findMany({
     where: { isFeatured: true },
@@ -133,15 +136,15 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Testimonials Section (NOW A SLIDESHOW) */}
-          <div className="pb-24">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <h2 className="text-4xl font-extrabold text-brand-dark mb-16">Success Stories</h2>
-              
-              {/* Rendering the new component here */}
-              <TestimonialSlideshow testimonials={testimonials} />
-
+          {/* Testimonials Ticker Section */}
+          <div className="pb-24 overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10">
+              <h2 className="text-4xl font-extrabold text-brand-dark">Success Stories</h2>
             </div>
+            
+            {/* The new infinite scrolling ticker */}
+            <TestimonialTicker testimonials={testimonials} />
+            
           </div>
 
         </div>
