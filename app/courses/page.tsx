@@ -1,37 +1,10 @@
-"use client"; // We need this for the fallback image
-
-import { useState } from "react";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
 import { BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import SearchBar from "@/components/SearchBar";
-
-// A tiny helper component to handle broken image links
-function ImageWithFallback({ src, alt, title }: { src: string, alt: string, title: string }) {
-  const [error, setError] = useState(false);
-
-  if (error || !src) {
-    return (
-      <div className="w-full h-full bg-gradient-to-br from-brand-dark to-brand-primary/80 flex items-center justify-center p-6 text-center">
-        <h3 className="text-white font-extrabold text-2xl leading-tight drop-shadow-md">{title}</h3>
-      </div>
-    );
-  }
-
-  return (
-    <Image 
-      src={src} 
-      alt={alt} 
-      fill 
-      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
-      className="object-contain group-hover:scale-105 transition-transform duration-500" 
-      onError={() => setError(true)}
-    />
-  );
-}
+import CourseImage from "@/components/CourseImage"; // <-- Import the new component
 
 export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const resolvedParams = await searchParams;
@@ -83,7 +56,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
                 <div key={course.id} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative group">
                   
                   <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden flex items-center justify-center">
-                     <ImageWithFallback src={course.imageUrl || ""} alt={course.title} title={course.title} />
+                     <CourseImage src={course.imageUrl || ""} alt={course.title} title={course.title} />
                   </div>
 
                   <div className="p-6 flex-grow flex flex-col bg-white">
