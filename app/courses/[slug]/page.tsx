@@ -1,7 +1,7 @@
-import Header from "@/components/Header";
+import HeaderWrapper from "@/components/HeaderWrapper";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
-import { ArrowLeft, CheckCircle2, PlayCircle, BookOpen, Clock, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, BookOpen, Clock, ShieldCheck, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
@@ -22,9 +22,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
   if (!course) notFound();
 
+  const secretPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'ops-master-2026';
+
   return (
     <div className="min-h-screen flex flex-col bg-[#F4F6F9] bg-dot-pattern">
-      <Header />
+      <HeaderWrapper />
 
       <main className="flex-grow pt-28 pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,14 +36,16 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           </Link>
 
           <div className="grid lg:grid-cols-3 gap-12">
+            
+            {/* Left Column: Course Info */}
             <div className="lg:col-span-2 space-y-8">
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <span className="bg-brand-primary text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    {course.classLevel}
+                    {course.classLevel || "Class"}
                   </span>
                   <span className="bg-brand-accent text-[#0F172A] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    {course.subject}
+                    {course.subject || "Subject"}
                   </span>
                 </div>
                 
@@ -54,12 +58,22 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </p>
               </div>
 
-              <div className="h-80 bg-[#0F172A] rounded-3xl flex items-center justify-center relative overflow-hidden group cursor-pointer border border-slate-800">
-                 <div className="absolute inset-0 bg-brand-primary/10"></div>
-                 <PlayCircle className="w-20 h-20 text-white/50 group-hover:text-brand-primary group-hover:scale-110 transition-all duration-300 z-10" />
-                 <p className="absolute bottom-6 text-white/70 font-bold tracking-widest uppercase text-sm z-10">Course Preview</p>
+              {/* COURSE IMAGE (Replacing Video Placeholder) */}
+              <div className="h-80 md:h-[450px] bg-white rounded-3xl overflow-hidden relative shadow-lg border border-slate-200">
+                 {course.imageUrl ? (
+                    <img 
+                      src={course.imageUrl} 
+                      alt={course.title} 
+                      className="w-full h-full object-cover" 
+                    />
+                 ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-brand-dark to-brand-primary/80 flex items-center justify-center p-6 text-center">
+                      <h3 className="text-white font-extrabold text-3xl leading-tight drop-shadow-md">{course.title}</h3>
+                    </div>
+                 )}
               </div>
 
+              {/* What you'll learn */}
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                 <h2 className="text-2xl font-bold text-brand-dark mb-6">What you'll learn</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -80,6 +94,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               </div>
             </div>
 
+            {/* Right Column: Sticky Enrolment Card */}
             <div className="lg:col-span-1">
               <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 sticky top-32">
                 <h3 className="text-xl font-bold text-brand-dark mb-2">Enrol in this course</h3>
@@ -101,11 +116,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 </div>
 
                 <div className="border-t border-slate-100 pt-6">
-                  <div className="flex items-end gap-2 mb-6">
-                    <span className="text-4xl font-extrabold text-brand-dark">₹4,999</span>
-                    <span className="text-lg text-slate-400 line-through font-bold mb-1">₹9,999</span>
-                  </div>
-
+                  {/* REMOVED FAKE PRICES HERE */}
+                  
                   <a 
                     href={course.purchaseUrl}
                     target="_blank" 
