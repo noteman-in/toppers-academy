@@ -1,148 +1,104 @@
-import Footer from "@/components/Footer";
-import TeacherSlideshow from "@/components/TeacherSlideshow";
-import { ArrowRight, BookOpen } from "lucide-react";
-import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import HeaderWrapper from "@/components/HeaderWrapper";
-import EnrollButton from "@/components/EnrollButton";
-import CourseImage from "@/components/CourseImage";
-import TestimonialTicker from "@/components/TestimonialTicker";
+import Link from "next/link";
+import AdminPageViewsChart from "@/components/AdminPageViewsChart";
+import { 
+  BookOpen, Users, FileText, CheckSquare, ArrowRight, Download, Eye
+} from "lucide-react";
 
-export default async function Home() {
-  const rawTestimonials = await prisma.testimonial.findMany({
-    take: 20,
-    orderBy: { createdAt: "desc" },
-  });
+export default async function AdminDashboard() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  const secretPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'ops-master-2026';
 
-  const testimonials = rawTestimonials.sort(() => 0.5 - Math.random());
+  if (!session) redirect(`/${secretPath}/login`);
 
-  const featuredCourses = await prisma.course.findMany({
-    where: { isFeatured: true },
-    take: 3,
-    orderBy: { createdAt: "desc" },
-  });
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [
+    totalCourses, totalTests, totalEnquiries, totalAttempts, totalResources,
+    todayViews, topPages, recentEnquiries, recentAttempts
+  ] = await Promise.all([
+    prisma.course.count(),
+    prisma.test.count(),
+    prisma.enquiry.count(),
+    prisma.testAttempt.count(),
+    prisma.resource.count(),
+    prisma.pageView.count({ where: { createdAt: { gte: today } } }),
+    prisma.pageView.groupBy({ by: ['path'], where: { createdAt: { gte: today } }, _count: { path: true }, orderBy: { _count: { path: 'desc' } }, take: 6 }),
+    prisma.enquiry.findMany({ take: 5, orderBy: { createdAt: "desc" } }),
+    prisma.testAttempt.findMany({ take: 5, orderBy: { createdAt: "desc" }, include: { test: true } }),
+  ]);
+
+  const stats = [
+    { title: "Views Today", value: todayViews, icon: Eye, href: "#", color: "text-orange-600", bg: "bg-orange-100" },
+    { title: "Courses", value: totalCourses, icon: BookOpen, href: `/${secretPath}/courses`, color: "text-blue-600", bg: "bg-blue-100" },
+    { title: "Tests", value: totalTests, icon: CheckSquare, href: `/${secretPath}/tests`, color: "text-purple-600", bg: "bg-purple-100" },
+    { title: "Attempts", value: totalAttempts, icon: Users, href: `/${secretPath}/results`, color: "text-green-600", bg: "bg-green-100" },
+    { title: "Enquiries", value: totalEnquiries, icon: FileText, href: `/${secretPath}/enquiries`, color: "text-amber-600", bg: "bg-amber-100" },
+    { title: "Resources", value: totalResources, icon: Download, href: `/${secretPath}/resources`, color: "text-pink-600", bg: "bg-pink-100" },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="absolute top-0 w-full z-50">
-        <HeaderWrapper />
+    <div className="p-8 max-w-7xl mx-auto">
+      <header className="mb-10">
+        <h1 className="text-3xl font-extrabold text-brand-dark">Welcome back, {session.user.name}</h1>
+        <p className="text-slate-500 mt-2">Here is what is happening at Toppers Academy today.</p>
+      </header>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
+        {stats.map((stat, i) => {
+          const Icon = stat.icon;
+          return (
+            <Link key={i} href={stat.href} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group cursor-pointer">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color} mb-3`}><Icon className="w-5 h-5" /></div>
+              <h3 className="text-slate-500 font-bold text-[10px] uppercase tracking-wider">{stat.title}</h3>
+              <p className="text-3xl font-extrabold text-brand-dark mt-1">{stat.value}</p>
+            </Link>
+          );
+        })}
       </div>
 
-      <main className="flex-grow">
-        <div className="relative bg-[#0F172A] pt-40 pb-32 lg:pt-48 lg:pb-48 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-primary/20 rounded-full blur-[120px] pointer-events-none"></div>
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-brand-accent/20 rounded-full blur-[100px] pointer-events-none"></div>
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-center relative z-10">
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-blue-200 px-4 py-2 rounded-full font-bold text-sm tracking-wide backdrop-blur-md">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-                </span>
-                India's Premier Commerce Academy
+      <div className="grid lg:grid-cols-2 gap-8 mb-10">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-brand-dark">Recent Enquiries</h2>
+            <Link href={`/${secretPath}/enquiries`} className="text-sm font-bold text-brand-primary hover:underline flex items-center gap-1 cursor-pointer">View All <ArrowRight className="w-4 h-4" /></Link>
+          </div>
+          <div className="space-y-4">
+            {recentEnquiries.length === 0 ? <p className="text-slate-500 text-center py-4">No enquiries yet.</p> : recentEnquiries.map((enquiry) => (
+              <div key={enquiry.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div><h3 className="font-bold text-brand-dark">{enquiry.name}</h3><p className="text-xs text-slate-500">{enquiry.phone}</p></div>
+                <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md">{enquiry.status}</span>
               </div>
-
-              <h1 className="text-5xl lg:text-7xl font-extrabold leading-[1.1] text-white">
-                Commerce Is Not Difficult. <br />
-                <span className="text-3xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-yellow-300 block mt-2">
-                  It Just Needs The Right Teacher.
-                </span>
-              </h1>
-
-              <p className="text-lg text-slate-200 max-w-xl leading-relaxed">
-                Learn Commerce with Vikrant Ahuja, bringing over 32 years of
-                teaching experience to your learning journey. Master Accountancy,
-                Economics, and Business Studies with proven methods.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link
-                  href="/courses"
-                  className="flex items-center justify-center gap-2 bg-brand-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-600 shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all hover:-translate-y-1 cursor-pointer"
-                >
-                  Explore Courses <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link
-                  href="/free-resources"
-                  className="flex items-center justify-center gap-2 bg-white/10 text-white border border-white/20 px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 backdrop-blur-sm transition-all cursor-pointer"
-                >
-                  <BookOpen className="w-5 h-5" /> Free Study Material
-                </Link>
-              </div>
-            </div>
-
-            <TeacherSlideshow />
+            ))}
           </div>
         </div>
 
-        <div className="bg-[#F4F6F9] bg-dot-pattern">
-          <div className="py-24">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl font-extrabold text-brand-dark mb-4">Master Your Exams</h2>
-                <p className="text-lg text-slate-600 max-w-2xl mx-auto">Structured courses designed by experts to help you score 95+ in your board exams.</p>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-8">
-                {featuredCourses.length === 0 ? (
-                  <div className="col-span-3 text-center text-slate-500 py-10 bg-white rounded-xl border border-slate-200">No featured courses yet. Add some from the Admin panel!</div>
-                ) : (
-                  featuredCourses.map((course) => (
-                    <div key={course.id} className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative cursor-pointer">
-
-                      <div className="aspect-[16/9] bg-[#0F172A] relative border-b border-slate-100 overflow-hidden group flex items-center justify-center">
-                        <CourseImage src={course.imageUrl || ""} alt={course.title} title={course.title} />
-                      </div>
-
-                      <div className="p-6 flex-grow flex flex-col bg-white">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
-                            {course.classLevel}
-                          </span>
-                          <span className="text-xs font-bold text-brand-accent uppercase tracking-wider">
-                            {course.subject}
-                          </span>
-                        </div>
-
-                        <h3 className="text-xl font-bold text-brand-dark mb-3">{course.title}</h3>
-                        <p className="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">{course.description}</p>
-                        
-                        <div className="flex flex-col mt-auto pt-4 border-t border-slate-100 gap-3">
-                          {/* Displaying the price here */}
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-sm text-slate-500 font-medium">Price:</span>
-                            <span className="text-2xl font-extrabold text-brand-dark">{course.price || "Contact Us"}</span>
-                          </div>
-                          
-                          <EnrollButton 
-                            mobileUrl={course.purchaseUrl} 
-                            webUrl={course.webPurchaseUrl} 
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-              <div className="text-center mt-12">
-                <Link href="/courses" className="inline-flex items-center gap-2 text-brand-primary font-bold hover:text-brand-dark transition-colors bg-white px-6 py-3 rounded-full shadow-sm border border-slate-200 cursor-pointer">
-                  View All Courses <ArrowRight className="w-5 h-5" />
-                </Link>
-              </div>
-            </div>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-brand-dark">Recent Test Attempts</h2>
+            <Link href={`/${secretPath}/results`} className="text-sm font-bold text-brand-primary hover:underline flex items-center gap-1 cursor-pointer">View All <ArrowRight className="w-4 h-4" /></Link>
           </div>
-
-          <div className="pb-24 overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10">
-              <h2 className="text-4xl font-extrabold text-brand-dark">Success Stories</h2>
-            </div>
-            <TestimonialTicker testimonials={testimonials} />
+          <div className="space-y-4">
+            {recentAttempts.length === 0 ? <p className="text-slate-500 text-center py-4">No test attempts yet.</p> : recentAttempts.map((attempt) => (
+              <div key={attempt.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div><h3 className="font-bold text-brand-dark">{attempt.studentName}</h3><p className="text-xs text-slate-500">{attempt.test.title}</p></div>
+                <div className="text-right"><p className="font-extrabold text-brand-dark">{attempt.score} / {attempt.totalQuestions}</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Score</p></div>
+              </div>
+            ))}
           </div>
-
         </div>
-      </main>
-      <Footer />
+      </div>
+
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-bold text-brand-dark flex items-center gap-2"><Eye className="w-5 h-5 text-brand-primary" /> Most Visited Pages Today</h2>
+        </div>
+        {topPages.length === 0 ? <p className="text-slate-500 text-center py-8">No page views tracked today.</p> : <AdminPageViewsChart data={topPages} />}
+      </div>
     </div>
   );
 }
