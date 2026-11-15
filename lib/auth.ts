@@ -6,6 +6,9 @@ import { prisma } from "./prisma";
 const ownerEmails = (process.env.OWNER_EMAILS || "").split(",").map(e => e.trim().toLowerCase());
 
 export const auth = betterAuth({
+  // 👇 1. ADD THIS: Explicitly set the base URL
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -18,6 +21,8 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
   },
+  
+  // 👇 2. Ensure trustedOrigins is set correctly
   trustedOrigins: [
     process.env.BETTER_AUTH_URL || "http://localhost:3000",
   ],
