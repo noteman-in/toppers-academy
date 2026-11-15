@@ -10,20 +10,15 @@ import { unstable_cache } from "next/cache";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
-// 1. MAKE METADATA DYNAMIC
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await prisma.siteSettings.findUnique({ where: { id: "global" } });
-  const academyName = settings?.academyName || "Commerce by Vikrant Ahuja";
-
-  return {
-    title: academyName,
+// 1. HARDCODED METADATA FOR SHARING
+export const metadata: Metadata = {
+  title: "Commerce by Vikrant Ahuja",
+  description: "Learn Commerce with Vikrant Ahuja, bringing over 32 years of teaching experience.",
+  openGraph: {
+    title: "Commerce by Vikrant Ahuja",
     description: "Learn Commerce with Vikrant Ahuja, bringing over 32 years of teaching experience.",
-    openGraph: {
-      title: academyName,
-      description: "Learn Commerce with Vikrant Ahuja, bringing over 32 years of teaching experience.",
-    }
-  };
-}
+  }
+};
 
 const getCachedSettings = unstable_cache(
   async () => {

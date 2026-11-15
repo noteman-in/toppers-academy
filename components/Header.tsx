@@ -5,7 +5,7 @@ import { Menu, X, GraduationCap, ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 export default function Header({ 
-  academyName = "Toppers Academy", 
+  academyName = "Commerce by Vikrant Ahuja", 
   announcementText = "", 
   announcementLink = "" 
 }: { 
@@ -26,14 +26,12 @@ export default function Header({
 
   return (
     <div className="w-full flex flex-col">
-      {/* DYNAMIC Announcement Bar */}
-            {/* DYNAMIC Announcement Bar */}
+      {/* Announcement Bar */}
       {announcementText && (
         <div className="bg-[#0F172A] text-white py-2 border-b border-white/10 relative z-50">
           <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-center gap-2 text-sm font-medium text-center">
             <span className="bg-brand-accent text-[#0F172A] px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider">New</span>
             <span className="text-slate-300">{announcementText}</span>
-            
             {announcementLink && (
               announcementLink.startsWith("http") ? (
                 <a href={announcementLink} target="_blank" rel="noopener noreferrer" className="text-brand-accent hover:text-yellow-400 flex items-center gap-1 transition-colors underline decoration-brand-accent/30">
@@ -57,14 +55,17 @@ export default function Header({
             <div className="bg-brand-primary text-white p-2 rounded-xl group-hover:scale-105 transition-transform shadow-lg shadow-brand-primary/20">
               <GraduationCap className="w-6 h-6" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-white tracking-tight leading-none">
-                {academyName}
+            
+            {/* EXACT VISUAL MATCH FOR HEADER */}
+            <div className="flex flex-col justify-center">
+              <span className="text-2xl font-extrabold text-white tracking-tight leading-none">
+                Commerce
               </span>
-              <span className="text-xs font-bold text-brand-accent tracking-widest uppercase mt-1">
-                By Vikrant Ahuja
+              <span className="text-[10px] font-bold text-brand-accent tracking-widest uppercase mt-1">
+                BY VIKRANT AHUJA
               </span>
             </div>
+
           </Link>
 
           <nav className="hidden md:flex space-x-8">
@@ -86,7 +87,7 @@ export default function Header({
           </button>
         </div>
 
-                {/* Mobile Menu */}
+        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden fixed top-[80px] left-0 w-full h-[calc(100vh-80px)] bg-[#0F172A] border-b border-white/10 shadow-2xl py-4 px-4 flex flex-col space-y-2 overflow-y-auto z-50">
             {navLinks.map((item) => (
