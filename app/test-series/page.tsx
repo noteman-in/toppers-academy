@@ -1,14 +1,16 @@
-import HeaderWrapper from "@/components/HeaderWrapper"; // Use wrapper for dynamic academy name
+import HeaderWrapper from "@/components/HeaderWrapper";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
 import { ArrowRight, FileText, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 export default async function TestSeriesPage() {
-  // Fetch the actual tests created in the Admin panel
+  const settings = await prisma.siteSettings.findUnique({ where: { id: "global" } });
+  const academyName = settings?.academyName || "Toppers Academy";
+  
   const tests = await prisma.test.findMany({ 
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { questions: true } } } // Count the questions
+    include: { _count: { select: { questions: true } } }
   });
 
   return (
@@ -18,7 +20,7 @@ export default async function TestSeriesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h1 className="text-4xl lg:text-5xl font-extrabold text-brand-dark mb-6">
-              Master Your Exams with <span className="text-brand-primary">Free Mock Tests</span>
+              Master Your Exams with <span className="text-brand-primary">{academyName}</span>
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               Test your knowledge instantly. No login required. Just enter your details and start.
@@ -55,7 +57,7 @@ export default async function TestSeriesPage() {
                   <div className="pt-4 border-t border-slate-100">
                     <Link 
                       href={`/test-series/${test.id}`} 
-                      className="flex items-center justify-center gap-2 w-full bg-brand-primary text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors shadow-md"
+                      className="flex items-center justify-center gap-2 w-full bg-brand-primary text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors shadow-md cursor-pointer"
                     >
                       Start Test <ArrowRight className="w-4 h-4" />
                     </Link>

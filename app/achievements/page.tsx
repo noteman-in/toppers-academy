@@ -1,11 +1,14 @@
 import HeaderWrapper from "@/components/HeaderWrapper";
 import Footer from "@/components/Footer";
-import { Trophy, Star } from "lucide-react";
+import { Trophy } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-// THIS LINE FIXES THE NETLIFY BUILD ERROR
 export const dynamic = 'force-dynamic';
 
-export default function AchievementsPage() {
+export default async function AchievementsPage() {
+  const settings = await prisma.siteSettings.findUnique({ where: { id: "global" } });
+  const academyName = settings?.academyName || "Toppers Academy";
+
   const toppers = [
     { name: "Rahul Sharma", score: "99%", exam: "CBSE Class 12 Accountancy", year: "2023" },
     { name: "Priya Singh", score: "98%", exam: "CBSE Class 12 Economics", year: "2023" },
@@ -21,7 +24,7 @@ export default function AchievementsPage() {
             <h1 className="text-4xl lg:text-5xl font-extrabold text-brand-dark mb-6">
               Our <span className="text-brand-primary">Toppers</span>
             </h1>
-            <p className="text-lg text-slate-600">Celebrating the hard work and success of our brilliant students.</p>
+            <p className="text-lg text-slate-600">Celebrating the hard work and success of {academyName} students.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
